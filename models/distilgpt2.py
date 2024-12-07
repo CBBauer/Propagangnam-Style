@@ -154,7 +154,7 @@ class PropagandaDetector:
         # Compute metrics
         accuracy = accuracy_score(labels_flat, preds_flat)
         precision, recall, f1, _ = precision_recall_fscore_support(
-            labels_flat, preds_flat, average='binary', zero_division=1
+            labels_flat, preds_flat, average='weighted', zero_division=1
         )
         
         # Log detailed results
@@ -214,7 +214,7 @@ class PropagandaDetector:
             per_device_eval_batch_size=16,
             auto_find_batch_size=True, # finds batch size that fits memory
             num_train_epochs=epochs,
-            weight_decay=0.001, # update decay
+            #weight_decay=0.001, # update decay
             load_best_model_at_end=True,
             metric_for_best_model="f1",
             logging_steps=10,
