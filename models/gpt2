@@ -133,12 +133,8 @@ class PropagandaDetector:
     def compute_metrics(self, pred) -> Dict[str, float]:
         """
         Compute detailed metrics for token classification.
-        
-        Args:
-            pred: Prediction object from Trainer
-        
-        Returns:
-            dict: Computed metrics
+        Args: pred: Prediction object from Trainer
+        Returns: dict: Computed metrics
         """
         labels = pred.label_ids
         preds = pred.predictions.argmax(-1)
@@ -205,7 +201,7 @@ class PropagandaDetector:
         # Define training arguments
         training_args = TrainingArguments(
             output_dir=self.output_dir,
-            evaluation_strategy="epoch",
+            eval_strategy="epoch",
             save_strategy="epoch",
             logging_dir=os.path.join(self.output_dir, "logs"),
             learning_rate=learning_rate,
