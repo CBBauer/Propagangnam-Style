@@ -139,32 +139,40 @@ class PropagandaDetector:
         labels = pred.label_ids
         preds = pred.predictions.argmax(-1)
 
-        # Flatten and remove ignored indices
-        labels_flat = [label for sublist in labels for label in sublist if label != -100]
-        preds_flat = [pred for sublist, label_sublist in zip(preds, labels) 
-                      for pred, label in zip(sublist, label_sublist) if label != -100]
+        # Flatten and remove ignored indices (-100)
+        labels_flat = []
+        preds_flat = []
+        for label_seq, pred_seq in zip(labels, preds):
+            for label, pred in zip(label_seq, pred_seq):
+                if label != -100:  # Ignore padding and special tokens
+                    labels_flat.append(label)
+                    preds_flat.append(pred)
+
+        # Ensure there are valid predictions/labels
+        if len(labels_flat) == 0 or len(preds_flat) == 0:
+            raise ValueError("No valid predictions or labels to compute metrics.")
 
         # Compute metrics
         accuracy = accuracy_score(labels_flat, preds_flat)
         precision, recall, f1, _ = precision_recall_fscore_support(
-            labels_flat, preds_flat, average='binary', zero_division=1
+            labels_flat, preds_flat, average="binary", zero_division=1
         )
-        
-        # Log detailed results
-        report = classification_report(labels_flat, preds_flat)
+
+        # Log detailed classification results
+        report = classification_report(labels_flat, preds_flat, zero_division=1)
         with open(os.path.join(self.output_dir, 'classification_report.txt'), 'w') as f:
-            f.write(f"Accuracy: {accuracy}\n")
-            f.write(f"Precision: {precision}\n")
-            f.write(f"Recall: {recall}\n")
-            f.write(f"F1 Score: {f1}\n\n")
+            f.write(f"Accuracy: {accuracy:.4f}\n")
+            f.write(f"Precision: {precision:.4f}\n")
+            f.write(f"Recall: {recall:.4f}\n")
+            f.write(f"F1 Score: {f1:.4f}\n\n")
             f.write("Detailed Classification Report:\n")
             f.write(report)
         
         return {
-            'accuracy': accuracy,
-            'precision': precision,
-            'recall': recall,
-            'f1': f1
+            "accuracy": accuracy,
+            "precision": precision,
+            "recall": recall,
+            "f1": f1
         }
 
     def train(self, 
